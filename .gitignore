@@ -1,0 +1,15 @@
+# Terraform
+**/.terraform/*
+*.tfstate
+*.tfstate.*
+*.tfplan
+terraform.tfvars
+
+# Secrets
+.env
+.env.*
+*.pem
+*.key
+
+# macOS
+.DS_Store
