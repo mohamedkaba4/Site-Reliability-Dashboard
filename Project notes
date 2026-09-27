@@ -13,3 +13,81 @@ prometheus: keeps metrics 7 days, gets 20 GiB storage, CPU/RAM limits.
 alertmanager: handles/routs alerts, gets 5 GiB storage.
 kube-state-metrics: reports Kubernetes object state like Pods, Deployments, replicas.
 prometheus-node-exporter: reports node-level CPU, memory, disk, network metrics.
+
+Commands
+kubectl apply -f tempo.yaml
+Kubernetes did not “run Tempo.” It created/updated the object described in that file.  k8s/datasources/tempo.yaml is a ConfigMap. So the flow is:
+tempo.yaml
+   ↓
+kubectl apply
+   ↓
+Kubernetes API
+   ↓
+ConfigMap created/updated
+   ↓
+Grafana datasource sidecar notices it
+   ↓
+Grafana learns about Tempo
+
+
+
+AKS / Kubernetes
+      ↓ metrics
+Prometheus
+      ↓ queries
+Grafana dashboards
+
+workflow
+Kubernetes ConfigMap
+        ↓
+Grafana sidecar detects label
+        ↓
+reads embedded dashboard JSON
+        ↓
+Grafana creates dashboard
+        ↓
+dashboard runs PromQL queries
+        ↓
+Prometheus returns metrics
+        ↓
+Grafana displays graphs/stats
+
+DATASOURCE works by: 
+You’ll have two different Tempo YAML files with different jobs:
+helm/tempo/values.yaml
+
+This configures the Tempo application itself:
+- replicas
+- storage
+- Workload Identity
+- OpenTelemetry Protocol (OTLP) ports
+- resources
+- persistence
+Then:
+k8s/datasources/tempo.yaml
+
+This configures Grafana to connect to Tempo as a datasource.
+So:
+helm/tempo/values.yaml
+        ↓
+deploys/configures Tempo
+
+k8s/datasources/tempo.yaml
+        ↓
+tells Grafana where Tempo is
+Loki is being used to store ingested logs from k8.
+Grafana Alloy is an open-source, vendor-neutral telemetry collector and observability agent that leverages Loki for storage
+Tempo monolithic is being used for storing and indexing traces from k8
+Grafana ↔ Loki — datasource works; successfully queried real logs.
+OpenTelemetry Collector is a vendor-agnostic proxy and service that receives, processes, and exports telemetry data like traces, metrics, and logs.
+
+Grafana — the dashboard/UI.
+Prometheus — collects and stores metrics.
+Alertmanager — handles/routs alerts.
+kube-state-metrics — exposes Kubernetes object state as metrics.
+node-exporter — exposes node CPU, RAM, disk, network metrics.
+Alloy — collects logs and sends them to Loki.
+Loki — stores/queries logs.
+Loki gateway/cache/canary — supporting Loki components.
+Tempo — stores/queries traces.
+OpenTelemetry Collector — will receive/process traces and send them to Tempo.
