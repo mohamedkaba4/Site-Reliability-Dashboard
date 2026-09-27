@@ -1,0 +1,15 @@
+To implement this dashboard the optiosn 
+AKS or EKS
+Self host Kubernetes clusters
+K3 clusters
+VM server infra
+
+Initally thought about self hosting nodes to save on costs but realized I implement a cloud-native solution would be beneficial.
+
+Helm config:
+grafana: internal-only service, 10 GiB persistent storage, CPU/RAM limits.
+sidecar: auto-loads dashboards and data sources from Kubernetes config.
+prometheus: keeps metrics 7 days, gets 20 GiB storage, CPU/RAM limits.
+alertmanager: handles/routs alerts, gets 5 GiB storage.
+kube-state-metrics: reports Kubernetes object state like Pods, Deployments, replicas.
+prometheus-node-exporter: reports node-level CPU, memory, disk, network metrics.
