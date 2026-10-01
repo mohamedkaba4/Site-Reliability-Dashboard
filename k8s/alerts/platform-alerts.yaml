@@ -1,0 +1,81 @@
+apiVersion: monitoring.coreos.com/v1
+kind: PrometheusRule
+metadata:
+  name: sre-platform-alerts
+  namespace: observability
+  labels:
+    release: sre-monitoring
+spec:
+  groups:
+    - name: sre-platform
+      rules:
+
+        - alert: KubernetesNodeNotReady
+          expr: kube_node_status_condition{condition="Ready",status="true"} == 0
+          for: 5m
+          labels:
+            severity: critical
+          annotations:
+            summary: "Kubernetes node is not ready"
+            description: "Node {{ $labels.node }} has been NotReady for more than 5 minutes."
+
+        - alert: PodCrashLooping
+          expr: rate(kube_pod_container_status_restarts_total[15m]) > 0
+          for: 10m
+          labels:
+            severity: warning
+          annotations:
+            summary: "Pod is repeatedly restarting"
+            description: "Pod {{ $labels.namespace }}/{{ $labels.pod }} is restarting repeatedly."
+
+        - alert: PodNotReady
+          expr: |
+            kube_pod_status_ready{condition="true"} == 0
+            and
+            kube_pod_status_phase{phase="Running"} == 1
+          for: 10m
+          labels:
+            severity: warning
+          annotations:
+            summary: "Pod is not ready"
+            description: "Pod {{ $labels.namespace }}/{{ $labels.pod }} has been running but not ready for 10 minutes."
+
+        - alert: NodeHighCPU
+          expr: |
+            100 -
+            (
+              avg by(instance) (
+                rate(node_cpu_seconds_total{mode="idle"}[5m])
+              ) * 100
+            ) > 85
+          for: 10m
+          labels:
+            severity: warning
+          annotations:
+            summary: "Node CPU usage is high"
+            description: "Node {{ $labels.instance }} CPU usage has exceeded 85% for 10 minutes."
+
+        - alert: NodeHighMemory
+          expr: |
+            (
+              1 -
+              (
+                node_memory_MemAvailable_bytes /
+                node_memory_MemTotal_bytes
+              )
+            ) * 100 > 85
+          for: 10m
+          labels:
+            severity: warning
+          annotations:
+            summary: "Node memory usage is high"
+            description: "Node {{ $labels.instance }} memory usage has exceeded 85% for 10 minutes."
+
+        - alert: PrometheusTargetDown
+          expr: up == 0
+          for: 5m
+          labels:
+            severity: critical
+          annotations:
+            summary: "Prometheus target is down"
+            description: "Prometheus target {{ $labels.instance }} for job {{ $labels.job }} has been down for more than 5 minutes."

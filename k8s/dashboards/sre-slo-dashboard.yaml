@@ -1,0 +1,113 @@
+apiVersion: v1
+kind: ConfigMap
+metadata:
+  name: grafana-dashboard-sre-slo
+  namespace: observability
+  labels:
+    grafana_dashboard: "1"
+data:
+  sre-slo-dashboard.json: |
+    {
+      "title": "SRE Platform - SLO & Error Budget",
+      "uid": "sre-platform-slo",
+      "schemaVersion": 39,
+      "version": 1,
+      "refresh": "30s",
+      "time": {
+        "from": "now-24h",
+        "to": "now"
+      },
+      "panels": [
+        {
+          "type": "stat",
+          "title": "Current Availability",
+          "id": 1,
+          "gridPos": {"h": 8, "w": 6, "x": 0, "y": 0},
+          "targets": [
+            {
+              "expr": "sre:platform_availability:ratio * 100",
+              "refId": "A"
+            }
+          ],
+          "fieldConfig": {
+            "defaults": {
+              "unit": "percent",
+              "decimals": 3
+            }
+          }
+        },
+        {
+          "type": "stat",
+          "title": "30-Day Availability",
+          "id": 2,
+          "gridPos": {"h": 8, "w": 6, "x": 6, "y": 0},
+          "targets": [
+            {
+              "expr": "sre:platform_availability_30d:ratio * 100",
+              "refId": "A"
+            }
+          ],
+          "fieldConfig": {
+            "defaults": {
+              "unit": "percent",
+              "decimals": 3
+            }
+          }
+        },
+        {
+          "type": "stat",
+          "title": "Error Budget Remaining",
+          "id": 3,
+          "gridPos": {"h": 8, "w": 6, "x": 12, "y": 0},
+          "targets": [
+            {
+              "expr": "sre:platform_error_budget_remaining:ratio * 100",
+              "refId": "A"
+            }
+          ],
+          "fieldConfig": {
+            "defaults": {
+              "unit": "percent",
+              "decimals": 1
+            }
+          }
+        },
+        {
+          "type": "stat",
+          "title": "SLO Target",
+          "id": 4,
+          "gridPos": {"h": 8, "w": 6, "x": 18, "y": 0},
+          "targets": [
+            {
+              "expr": "vector(99.9)",
+              "refId": "A"
+            }
+          ],
+          "fieldConfig": {
+            "defaults": {
+              "unit": "percent",
+              "decimals": 1
+            }
+          }
+        },
+        {
+          "type": "timeseries",
+          "title": "Platform Availability",
+          "id": 5,
+          "gridPos": {"h": 10, "w": 24, "x": 0, "y": 8},
+          "targets": [
+            {
+              "expr": "sre:platform_availability:ratio * 100",
+              "legendFormat": "Availability",
+              "refId": "A"
+            }
+          ],
+          "fieldConfig": {
+            "defaults": {
+              "unit": "percent",
+              "decimals": 3
+            }
+          }
+        }
+      ]
+    }

@@ -1,0 +1,78 @@
+apiVersion: monitoring.coreos.com/v1
+kind: PrometheusRule
+metadata:
+  name: sre-platform-slo
+  namespace: observability
+  labels:
+    release: sre-monitoring
+spec:
+  groups:
+    - name: sre-platform-slo-recording
+      interval: 30s
+      rules:
+        - record: sre:platform_availability:ratio
+          expr: |
+            avg(
+              avg by (job) (
+                up{
+                  job=~"apiserver|coredns|kubelet|node-exporter|kube-state-metrics|sre-monitoring-kube-promet-prometheus|sre-monitoring-kube-promet-alertmanager|sre-monitoring-grafana|alloy|loki|tempo|otel-collector-opentelemetry-collector"
+                }
+              )
+            )
+
+        - record: sre:platform_availability_30d:ratio
+          expr: |
+            avg_over_time(sre:platform_availability:ratio[30d])
+
+        - record: sre:platform_error_budget_remaining:ratio
+          expr: |
+            clamp_max(
+              clamp_min(
+                1 -
+                (
+                  (1 - avg_over_time(sre:platform_availability:ratio[30d]))
+                  /
+                  0.001
+                ),
+                0
+              ),
+              1
+            )
+
+    - name: sre-platform-slo-alerts
+      rules:
+        - alert: PlatformSLOFastBurn
+          expr: |
+            (
+              (1 - avg_over_time(sre:platform_availability:ratio[5m]))
+              / 0.001
+            ) > 14.4
+            and
+            (
+              (1 - avg_over_time(sre:platform_availability:ratio[1h]))
+              / 0.001
+            ) > 14.4
+          for: 2m
+          labels:
+            severity: critical
+            slo: platform-availability
+          annotations:
+            summary: "Observability platform is rapidly consuming its error budget"
+
+        - alert: PlatformSLOSlowBurn
+          expr: |
+            (
+              (1 - avg_over_time(sre:platform_availability:ratio[30m]))
+              / 0.001
+            ) > 6
+            and
+            (
+              (1 - avg_over_time(sre:platform_availability:ratio[6h]))
+              / 0.001
+            ) > 6
+          for: 15m
+          labels:
+            severity: warning
+            slo: platform-availability
+          annotations:
+            summary: "Observability platform is steadily consuming its error budget"

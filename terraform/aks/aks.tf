@@ -56,6 +56,12 @@ resource "azurerm_kubernetes_cluster" "main" {
     max_count            = var.system_node_max_count
 
     zones = ["1", "2", "3"]
+
+    upgrade_settings {
+      max_surge                     = "10%"
+      drain_timeout_in_minutes      = 0
+      node_soak_duration_in_minutes = 0
+    }
   }
 
   identity {

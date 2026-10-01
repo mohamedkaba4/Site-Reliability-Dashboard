@@ -12,8 +12,8 @@ aks_subnet_name                      = "snet-aks-001"
 aks_admin_group_object_id            = "9c6a7377-3f83-47c8-9375-9886d45ab5fa"
 
 # Production-style system node pool
-system_node_vm_size   = "Standard_D4als_v7"
-system_node_min_count = 2
+system_node_vm_size   = "Standard_D4s_v7"
+system_node_min_count = 1
 system_node_max_count = 3
 
 tags = {

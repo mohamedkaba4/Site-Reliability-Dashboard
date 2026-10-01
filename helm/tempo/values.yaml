@@ -1,0 +1,47 @@
+replicas: 1
+
+podLabels:
+  azure.workload.identity/use: "true"
+
+serviceAccount:
+  create: true
+  name: tempo
+  annotations:
+    azure.workload.identity/client-id: "b976e263-483e-45e8-8ecb-4ba47772266c"
+
+tempo:
+  reportingEnabled: false
+
+  receivers:
+    otlp:
+      protocols:
+        grpc:
+          endpoint: 0.0.0.0:4317
+        http:
+          endpoint: 0.0.0.0:4318
+
+  storage:
+    trace:
+      backend: azure
+
+      azure:
+        storage_account_name: stmavencresttempoprod
+        container_name: tempo-traces
+        use_federated_token: true
+
+      wal:
+        path: /var/tempo/wal
+
+  retention: 168h
+
+resources:
+  requests:
+    cpu: 200m
+    memory: 512Mi
+  limits:
+    cpu: "1"
+    memory: 1Gi
+
+persistence:
+  enabled: true
+  size: 10Gi

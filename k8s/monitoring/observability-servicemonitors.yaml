@@ -1,0 +1,77 @@
+apiVersion: monitoring.coreos.com/v1
+kind: ServiceMonitor
+metadata:
+  name: alloy
+  namespace: observability
+  labels:
+    release: sre-monitoring
+spec:
+  namespaceSelector:
+    matchNames:
+      - alloy
+  selector:
+    matchLabels:
+      app.kubernetes.io/instance: alloy
+  endpoints:
+    - port: http-metrics
+      interval: 30s
+
+---
+apiVersion: monitoring.coreos.com/v1
+kind: ServiceMonitor
+metadata:
+  name: loki
+  namespace: observability
+  labels:
+    release: sre-monitoring
+spec:
+  namespaceSelector:
+    matchNames:
+      - loki
+  selector:
+    matchLabels:
+      app.kubernetes.io/instance: loki
+      app.kubernetes.io/name: loki
+  endpoints:
+    - port: http-metrics
+      interval: 30s
+
+---
+apiVersion: monitoring.coreos.com/v1
+kind: ServiceMonitor
+metadata:
+  name: tempo
+  namespace: observability
+  labels:
+    release: sre-monitoring
+spec:
+  namespaceSelector:
+    matchNames:
+      - tempo
+  selector:
+    matchLabels:
+      app.kubernetes.io/instance: tempo
+      app.kubernetes.io/name: tempo
+  endpoints:
+    - port: tempo-prom-metrics
+      interval: 30s
+
+---
+apiVersion: monitoring.coreos.com/v1
+kind: ServiceMonitor
+metadata:
+  name: otel-collector
+  namespace: observability
+  labels:
+    release: sre-monitoring
+spec:
+  namespaceSelector:
+    matchNames:
+      - opentelemetry
+  selector:
+    matchLabels:
+      app.kubernetes.io/instance: otel-collector
+      app.kubernetes.io/name: opentelemetry-collector
+  endpoints:
+    - port: metrics
+      interval: 30s

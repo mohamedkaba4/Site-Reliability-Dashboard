@@ -77,3 +77,9 @@ prometheus-node-exporter:
     limits:
       cpu: 200m
       memory: 128Mi
+
+defaultRules:
+  disabled:
+    KubeControllerManagerDown: true
+    KubeSchedulerDown: true
+    KubeProxyDown: true

@@ -1,0 +1,19 @@
+apiVersion: monitoring.coreos.com/v1
+kind: PrometheusRule
+metadata:
+  name: sre-test-alert
+  namespace: observability
+  labels:
+    release: sre-monitoring
+spec:
+  groups:
+    - name: sre-test
+      rules:
+        - alert: SRETestAlert
+          expr: vector(1)
+          for: 1m
+          labels:
+            severity: warning
+          annotations:
+            summary: "SRE platform test alert"
+            description: "Temporary alert used to validate Prometheus and Alertmanager."

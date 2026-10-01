@@ -1,0 +1,5 @@
+grafana:
+  service:
+    type: LoadBalancer
+    loadBalancerSourceRanges:
+      - "24.197.163.53/32"
