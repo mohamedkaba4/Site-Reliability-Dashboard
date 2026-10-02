@@ -1,0 +1,20 @@
+grafana:
+  env:
+    AWS_ROLE_ARN: "arn:aws:iam::063899249655:role/sre-grafana-cloudwatch-reader"
+    AWS_WEB_IDENTITY_TOKEN_FILE: "/var/run/secrets/aws/token"
+    AWS_REGION: "us-east-1"
+    AWS_DEFAULT_REGION: "us-east-1"
+
+  extraContainerVolumes:
+    - name: aws-web-identity-token
+      projected:
+        sources:
+          - serviceAccountToken:
+              path: token
+              audience: sts.amazonaws.com
+              expirationSeconds: 3600
+
+  extraVolumeMounts:
+    - name: aws-web-identity-token
+      mountPath: /var/run/secrets/aws
+      readOnly: true

@@ -1,6 +1,8 @@
 grafana:
   service:
-    type: ClusterIP
+    type: LoadBalancer
+    loadBalancerSourceRanges:
+      - "24.197.163.53/32"
 
   persistence:
     enabled: true

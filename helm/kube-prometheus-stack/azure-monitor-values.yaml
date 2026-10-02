@@ -1,0 +1,20 @@
+grafana:
+  serviceAccount:
+    annotations:
+      azure.workload.identity/client-id: "b8c1d812-fb7d-4fd2-a99c-c402d1263993"
+
+  podLabels:
+    azure.workload.identity/use: "true"
+
+  grafana.ini:
+    azure:
+      workload_identity_enabled: true
+
+  additionalDataSources:
+    - name: Azure Monitor
+      type: grafana-azure-monitor-datasource
+      access: proxy
+      isDefault: false
+      jsonData:
+        azureAuthType: workloadidentity
+        subscriptionId: "59b3a0c1-d71e-452f-9950-e28743627a30"
